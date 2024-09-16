@@ -11,18 +11,18 @@
         <h1>Simulador Fiscal</h1>
         <div id="etapa1" class="etapa">
             <h2>Dados Iniciais</h2>
-            <input type="number" id="salarioBruto" placeholder="Salário Bruto Mensal">
-            <input type="number" id="subsidioAlimentacao" placeholder="Subsídio de Alimentação">
-            <input type="number" id="outrosBeneficios" placeholder="Outros Benefícios">
+            <input type="number" id="salarioBruto" placeholder="Salário Bruto Mensal" title="Valor mensal antes de impostos e deduções.">
+            <input type="number" id="subsidioAlimentacao" placeholder="Subsídio de Alimentação" title="Valor diário para refeições, isento até certo limite.">
+            <input type="number" id="outrosBeneficios" placeholder="Outros Benefícios" title="Outros benefícios não monetários (ex: seguro de saúde).">
             <button onclick="avancarEtapa()">Avançar</button>
         </div>
         <div id="etapa2" class="etapa" style="display: none;">
             <h2>Despesas Pessoais</h2>
-            <input type="number" id="internet" placeholder="Internet">
-            <input type="number" id="transporte" placeholder="Transporte">
-            <input type="number" id="combustivel" placeholder="Combustível">
-            <input type="number" id="equipamentoTrabalho" placeholder="Equipamento de Trabalho">
-            <input type="number" id="formacaoProfissional" placeholder="Formação Profissional">
+            <input type="number" id="internet" placeholder="Internet" title="Despesas mensais com internet.">
+            <input type="number" id="transporte" placeholder="Transporte" title="Custos de deslocação para o trabalho.">
+            <input type="number" id="combustivel" placeholder="Combustível" title="Gastos mensais com combustível.">
+            <input type="number" id="equipamentoTrabalho" placeholder="Equipamento de Trabalho" title="Investimento em equipamentos necessários para o trabalho.">
+            <input type="number" id="formacaoProfissional" placeholder="Formação Profissional" title="Custos com cursos e formações profissionais.">
             <button onclick="avancarEtapa()">Avançar</button>
         </div>
         <div id="etapa3" class="etapa" style="display: none;">
