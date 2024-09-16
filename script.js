@@ -1,6 +1,7 @@
 let etapaAtual = 1;
 let dadosIniciais = {};
 let despesasPessoais = {};
+let grafico;
 
 function avancarEtapa() {
     if (etapaAtual === 1) {
@@ -69,19 +70,38 @@ function exibirResultados(resultadoFuncionario, resultadoENI) {
     const resultadosDiv = document.getElementById('resultados');
     resultadosDiv.innerHTML = `
         <h3>Cenário Funcionário</h3>
-        <p>Bruto: ${resultadoFuncionario.bruto.toFixed(2)}€</p>
-        <p>Líquido: ${resultadoFuncionario.liquido.toFixed(2)}€</p>
-        <p>Impostos: ${resultadoFuncionario.impostos.toFixed(2)}€</p>
+        <div>
+            <label>Salário Bruto: <input type="number" id="func_salarioBruto" value="${dadosIniciais.salarioBruto.toFixed(2)}" onchange="atualizarResultados()"></label>
+        </div>
+        <div>
+            <label>Subsídio Alimentação: <input type="number" id="func_subsidioAlimentacao" value="${dadosIniciais.subsidioAlimentacao.toFixed(2)}" onchange="atualizarResultados()"></label>
+        </div>
+        <div>
+            <label>Outros Benefícios: <input type="number" id="func_outrosBeneficios" value="${dadosIniciais.outrosBeneficios.toFixed(2)}" onchange="atualizarResultados()"></label>
+        </div>
+        <p>Bruto: <span id="func_bruto">${resultadoFuncionario.bruto.toFixed(2)}</span>€</p>
+        <p>Líquido: <span id="func_liquido">${resultadoFuncionario.liquido.toFixed(2)}</span>€</p>
+        <p>Impostos: <span id="func_impostos">${resultadoFuncionario.impostos.toFixed(2)}</span>€</p>
+        
         <h3>Cenário ENI</h3>
-        <p>Bruto: ${resultadoENI.bruto.toFixed(2)}€</p>
-        <p>Líquido: ${resultadoENI.liquido.toFixed(2)}€</p>
-        <p>Impostos: ${resultadoENI.impostos.toFixed(2)}€</p>
+        <div>
+            <label>Faturação: <input type="number" id="eni_faturacao" value="${resultadoENI.bruto.toFixed(2)}" onchange="atualizarResultados()"></label>
+        </div>
+        <div>
+            <label>Despesas: <input type="number" id="eni_despesas" value="${Object.values(despesasPessoais).reduce((a, b) => a + b, 0).toFixed(2)}" onchange="atualizarResultados()"></label>
+        </div>
+        <p>Bruto: <span id="eni_bruto">${resultadoENI.bruto.toFixed(2)}</span>€</p>
+        <p>Líquido: <span id="eni_liquido">${resultadoENI.liquido.toFixed(2)}</span>€</p>
+        <p>Impostos: <span id="eni_impostos">${resultadoENI.impostos.toFixed(2)}</span>€</p>
     `;
 }
 
 function criarGrafico(resultadoFuncionario, resultadoENI) {
     const ctx = document.getElementById('grafico').getContext('2d');
-    new Chart(ctx, {
+    if (grafico) {
+        grafico.destroy();
+    }
+    grafico = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['Funcionário', 'ENI'],
@@ -104,4 +124,32 @@ function criarGrafico(resultadoFuncionario, resultadoENI) {
             }
         }
     });
+}
+
+function atualizarResultados() {
+    dadosIniciais = {
+        salarioBruto: parseFloat(document.getElementById('func_salarioBruto').value) || 0,
+        subsidioAlimentacao: parseFloat(document.getElementById('func_subsidioAlimentacao').value) || 0,
+        outrosBeneficios: parseFloat(document.getElementById('func_outrosBeneficios').value) || 0
+    };
+
+    const eniFaturacao = parseFloat(document.getElementById('eni_faturacao').value) || 0;
+    const eniDespesas = parseFloat(document.getElementById('eni_despesas').value) || 0;
+
+    const resultadoFuncionario = calcularCenarioFuncionario();
+    const resultadoENI = {
+        bruto: eniFaturacao,
+        liquido: eniFaturacao - eniDespesas - (eniFaturacao - eniDespesas) * 0.25,
+        impostos: (eniFaturacao - eniDespesas) * 0.25
+    };
+
+    document.getElementById('func_bruto').textContent = resultadoFuncionario.bruto.toFixed(2);
+    document.getElementById('func_liquido').textContent = resultadoFuncionario.liquido.toFixed(2);
+    document.getElementById('func_impostos').textContent = resultadoFuncionario.impostos.toFixed(2);
+
+    document.getElementById('eni_bruto').textContent = resultadoENI.bruto.toFixed(2);
+    document.getElementById('eni_liquido').textContent = resultadoENI.liquido.toFixed(2);
+    document.getElementById('eni_impostos').textContent = resultadoENI.impostos.toFixed(2);
+
+    criarGrafico(resultadoFuncionario, resultadoENI);
 }
