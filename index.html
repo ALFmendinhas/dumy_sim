@@ -11,24 +11,56 @@
         <h1>Simulador Fiscal</h1>
         <div id="etapa1" class="etapa">
             <h2>Dados Iniciais</h2>
-            <input type="number" id="salarioBruto" placeholder="Salário Bruto Mensal" title="Valor mensal antes de impostos e deduções.">
-            <input type="number" id="subsidioAlimentacao" placeholder="Subsídio de Alimentação" title="Valor diário para refeições, isento até certo limite.">
-            <input type="number" id="outrosBeneficios" placeholder="Outros Benefícios" title="Outros benefícios não monetários (ex: seguro de saúde).">
+            <div class="input-group">
+                <label>Salário Bruto Mensal: <input type="number" id="salarioBruto" class="tooltip" title="Valor mensal antes de impostos e deduções."></label>
+            </div>
+            <div class="input-group">
+                <label>Subsídio de Alimentação: <input type="number" id="subsidioAlimentacao" class="tooltip" title="Valor diário para refeições, isento até certo limite."></label>
+            </div>
+            <div class="input-group">
+                <label>Outros Benefícios: <input type="number" id="outrosBeneficios" class="tooltip" title="Outros benefícios não monetários (ex: seguro de saúde)."></label>
+            </div>
             <button onclick="avancarEtapa()">Avançar</button>
         </div>
         <div id="etapa2" class="etapa" style="display: none;">
             <h2>Despesas Pessoais</h2>
-            <input type="number" id="internet" placeholder="Internet" title="Despesas mensais com internet.">
-            <input type="number" id="transporte" placeholder="Transporte" title="Custos de deslocação para o trabalho.">
-            <input type="number" id="combustivel" placeholder="Combustível" title="Gastos mensais com combustível.">
-            <input type="number" id="equipamentoTrabalho" placeholder="Equipamento de Trabalho" title="Investimento em equipamentos necessários para o trabalho.">
-            <input type="number" id="formacaoProfissional" placeholder="Formação Profissional" title="Custos com cursos e formações profissionais.">
+            <div class="input-group">
+                <label>Internet: <input type="number" id="internet" class="tooltip" title="Despesas mensais com internet."></label>
+            </div>
+            <div class="input-group">
+                <label>Transporte: <input type="number" id="transporte" class="tooltip" title="Custos de deslocação para o trabalho."></label>
+            </div>
+            <div class="input-group">
+                <label>Combustível: <input type="number" id="combustivel" class="tooltip" title="Gastos mensais com combustível."></label>
+            </div>
+            <div class="input-group">
+                <label>Equipamento de Trabalho: <input type="number" id="equipamentoTrabalho" class="tooltip" title="Investimento em equipamentos necessários para o trabalho."></label>
+            </div>
+            <div class="input-group">
+                <label>Formação Profissional: <input type="number" id="formacaoProfissional" class="tooltip" title="Custos com cursos e formações profissionais."></label>
+            </div>
             <button onclick="avancarEtapa()">Avançar</button>
         </div>
         <div id="etapa3" class="etapa" style="display: none;">
             <h2>Comparação de Cenários</h2>
-            <div id="resultados"></div>
-            <canvas id="grafico"></canvas>
+            <div class="grid">
+                <div class="coluna">
+                    <h3>Cenário Funcionário</h3>
+                    <div id="cenarioFuncionario"></div>
+                    <div id="totalFuncionario"></div>
+                </div>
+                <div class="coluna">
+                    <h3>Cenário ENI</h3>
+                    <div id="cenarioENI"></div>
+                    <div id="totalENI"></div>
+                </div>
+            </div>
+            <div style="width: 100%; height: 300px;">
+                <canvas id="grafico"></canvas>
+            </div>
+            <div class="alert">
+                ⚠️ Atenção: Esta simulação é simplificada. Consulte um profissional para aconselhamento personalizado.
+            </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
