@@ -1,20 +1,22 @@
 let etapaAtual = 1;
 let dadosIniciais = {};
 let despesasPessoais = {};
+let cenarioFuncionario = {};
+let cenarioENI = {};
 let grafico;
 
 function avancarEtapa() {
-    if (etapaAtual === 1) {
+    document.getElementById(`etapa${etapaAtual}`).style.display = 'none';
+    etapaAtual++;
+    document.getElementById(`etapa${etapaAtual}`).style.display = 'block';
+
+    if (etapaAtual === 2) {
         coletarDadosIniciais();
-        document.getElementById('etapa1').style.display = 'none';
-        document.getElementById('etapa2').style.display = 'block';
-        etapaAtual = 2;
-    } else if (etapaAtual === 2) {
+    } else if (etapaAtual === 3) {
         coletarDespesasPessoais();
-        calcularResultados();
-        document.getElementById('etapa2').style.display = 'none';
-        document.getElementById('etapa3').style.display = 'block';
-        etapaAtual = 3;
+        gerarCenarios();
+        exibirComparacao();
+        adicionarEventListeners();
     }
 }
 
@@ -36,82 +38,93 @@ function coletarDespesasPessoais() {
     };
 }
 
-function calcularResultados() {
-    const resultadoFuncionario = calcularCenarioFuncionario();
-    const resultadoENI = calcularCenarioENI();
+function gerarCenarios() {
+    cenarioFuncionario = {
+        salarioBruto: dadosIniciais.salarioBruto,
+        subsidioAlimentacao: dadosIniciais.subsidioAlimentacao,
+        outrosBeneficios: dadosIniciais.outrosBeneficios
+    };
 
-    exibirResultados(resultadoFuncionario, resultadoENI);
-    criarGrafico(resultadoFuncionario, resultadoENI);
-}
-
-function calcularCenarioFuncionario() {
-    const totalBruto = dadosIniciais.salarioBruto + dadosIniciais.subsidioAlimentacao + dadosIniciais.outrosBeneficios;
-    const impostos = totalBruto * 0.3; // Simulação simplificada de impostos
-    return {
-        bruto: totalBruto,
-        liquido: totalBruto - impostos,
-        impostos: impostos
+    cenarioENI = {
+        faturacao: dadosIniciais.salarioBruto * 1.2,
+        despesasOperacionais: despesasPessoais.internet + despesasPessoais.transporte + despesasPessoais.combustivel,
+        equipamentos: despesasPessoais.equipamentoTrabalho,
+        formacao: despesasPessoais.formacaoProfissional,
+        salarioProprio: dadosIniciais.salarioBruto * 0.7
     };
 }
 
-function calcularCenarioENI() {
-    const faturacao = dadosIniciais.salarioBruto * 1.2; // Simulação de faturação como ENI
-    const despesas = Object.values(despesasPessoais).reduce((a, b) => a + b, 0);
-    const lucro = faturacao - despesas;
-    const impostos = lucro * 0.25; // Simulação simplificada de impostos para ENI
-    return {
-        bruto: faturacao,
-        liquido: lucro - impostos,
-        impostos: impostos
-    };
+function calcularTotais(cenario, tipo) {
+    let totalBruto, impostos, liquido;
+
+    if (tipo === 'funcionario') {
+        totalBruto = cenario.salarioBruto + cenario.subsidioAlimentacao + cenario.outrosBeneficios;
+        impostos = totalBruto * 0.3; // Simulação simplificada de impostos
+        liquido = totalBruto - impostos;
+    } else {
+        totalBruto = cenario.faturacao;
+        const despesasTotais = cenario.despesasOperacionais + cenario.equipamentos + cenario.formacao + cenario.salarioProprio;
+        const lucro = totalBruto - despesasTotais;
+        impostos = lucro * 0.25; // Simulação simplificada de impostos para ENI
+        liquido = lucro - impostos;
+    }
+
+    return { totalBruto, impostos, liquido };
 }
 
-function exibirResultados(resultadoFuncionario, resultadoENI) {
-    const resultadosDiv = document.getElementById('resultados');
-    resultadosDiv.innerHTML = `
-        <h3>Cenário Funcionário</h3>
-        <div>
-            <label>Salário Bruto: <input type="number" id="func_salarioBruto" value="${dadosIniciais.salarioBruto.toFixed(2)}" onchange="atualizarResultados()"></label>
-        </div>
-        <div>
-            <label>Subsídio Alimentação: <input type="number" id="func_subsidioAlimentacao" value="${dadosIniciais.subsidioAlimentacao.toFixed(2)}" onchange="atualizarResultados()"></label>
-        </div>
-        <div>
-            <label>Outros Benefícios: <input type="number" id="func_outrosBeneficios" value="${dadosIniciais.outrosBeneficios.toFixed(2)}" onchange="atualizarResultados()"></label>
-        </div>
-        <p>Bruto: <span id="func_bruto">${resultadoFuncionario.bruto.toFixed(2)}</span>€</p>
-        <p>Líquido: <span id="func_liquido">${resultadoFuncionario.liquido.toFixed(2)}</span>€</p>
-        <p>Impostos: <span id="func_impostos">${resultadoFuncionario.impostos.toFixed(2)}</span>€</p>
-        
-        <h3>Cenário ENI</h3>
-        <div>
-            <label>Faturação: <input type="number" id="eni_faturacao" value="${resultadoENI.bruto.toFixed(2)}" onchange="atualizarResultados()"></label>
-        </div>
-        <div>
-            <label>Despesas: <input type="number" id="eni_despesas" value="${Object.values(despesasPessoais).reduce((a, b) => a + b, 0).toFixed(2)}" onchange="atualizarResultados()"></label>
-        </div>
-        <p>Bruto: <span id="eni_bruto">${resultadoENI.bruto.toFixed(2)}</span>€</p>
-        <p>Líquido: <span id="eni_liquido">${resultadoENI.liquido.toFixed(2)}</span>€</p>
-        <p>Impostos: <span id="eni_impostos">${resultadoENI.impostos.toFixed(2)}</span>€</p>
+function exibirComparacao() {
+    exibirCenario('Funcionario', cenarioFuncionario);
+    exibirCenario('ENI', cenarioENI);
+    criarGrafico();
+}
+
+function exibirCenario(tipo, cenario) {
+    const div = document.getElementById(`cenario${tipo}`);
+    div.innerHTML = '';
+    for (const [chave, valor] of Object.entries(cenario)) {
+        div.innerHTML += `
+            <div class="input-group">
+                <label>${chave}: 
+                    <input type="number" class="cenario-input" data-tipo="${tipo.toLowerCase()}" data-chave="${chave}" value="${valor.toFixed(2)}">
+                </label>
+            </div>`;
+    }
+
+    atualizarTotais(tipo, cenario);
+}
+
+function atualizarTotais(tipo, cenario) {
+    const totais = calcularTotais(cenario, tipo.toLowerCase());
+    const divTotal = document.getElementById(`total${tipo}`);
+    divTotal.innerHTML = `
+        <h4>Totais:</h4>
+        <p>Bruto: ${totais.totalBruto.toFixed(2)}€</p>
+        <p>Impostos: ${totais.impostos.toFixed(2)}€</p>
+        <p><strong>Líquido: ${totais.liquido.toFixed(2)}€</strong></p>
     `;
 }
 
-function criarGrafico(resultadoFuncionario, resultadoENI) {
+function criarGrafico() {
+    const totaisFuncionario = calcularTotais(cenarioFuncionario, 'funcionario');
+    const totaisENI = calcularTotais(cenarioENI, 'eni');
+
     const ctx = document.getElementById('grafico').getContext('2d');
+
     if (grafico) {
         grafico.destroy();
     }
+
     grafico = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['Funcionário', 'ENI'],
             datasets: [{
                 label: 'Rendimento Bruto',
-                data: [resultadoFuncionario.bruto, resultadoENI.bruto],
+                data: [totaisFuncionario.totalBruto, totaisENI.totalBruto],
                 backgroundColor: 'rgba(54, 162, 235, 0.5)'
             }, {
                 label: 'Rendimento Líquido',
-                data: [resultadoFuncionario.liquido, resultadoENI.liquido],
+                data: [totaisFuncionario.liquido, totaisENI.liquido],
                 backgroundColor: 'rgba(75, 192, 192, 0.5)'
             }]
         },
@@ -126,30 +139,25 @@ function criarGrafico(resultadoFuncionario, resultadoENI) {
     });
 }
 
-function atualizarResultados() {
-    dadosIniciais = {
-        salarioBruto: parseFloat(document.getElementById('func_salarioBruto').value) || 0,
-        subsidioAlimentacao: parseFloat(document.getElementById('func_subsidioAlimentacao').value) || 0,
-        outrosBeneficios: parseFloat(document.getElementById('func_outrosBeneficios').value) || 0
-    };
+function adicionarEventListeners() {
+    const inputs = document.querySelectorAll('.cenario-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', atualizarCenario);
+    });
+}
 
-    const eniFaturacao = parseFloat(document.getElementById('eni_faturacao').value) || 0;
-    const eniDespesas = parseFloat(document.getElementById('eni_despesas').value) || 0;
+function atualizarCenario(event) {
+    const tipo = event.target.dataset.tipo;
+    const chave = event.target.dataset.chave;
+    const valor = parseFloat(event.target.value) || 0;
 
-    const resultadoFuncionario = calcularCenarioFuncionario();
-    const resultadoENI = {
-        bruto: eniFaturacao,
-        liquido: eniFaturacao - eniDespesas - (eniFaturacao - eniDespesas) * 0.25,
-        impostos: (eniFaturacao - eniDespesas) * 0.25
-    };
+    if (tipo === 'funcionario') {
+        cenarioFuncionario[chave] = valor;
+        atualizarTotais('Funcionario', cenarioFuncionario);
+    } else {
+        cenarioENI[chave] = valor;
+        atualizarTotais('ENI', cenarioENI);
+    }
 
-    document.getElementById('func_bruto').textContent = resultadoFuncionario.bruto.toFixed(2);
-    document.getElementById('func_liquido').textContent = resultadoFuncionario.liquido.toFixed(2);
-    document.getElementById('func_impostos').textContent = resultadoFuncionario.impostos.toFixed(2);
-
-    document.getElementById('eni_bruto').textContent = resultadoENI.bruto.toFixed(2);
-    document.getElementById('eni_liquido').textContent = resultadoENI.liquido.toFixed(2);
-    document.getElementById('eni_impostos').textContent = resultadoENI.impostos.toFixed(2);
-
-    criarGrafico(resultadoFuncionario, resultadoENI);
+    criarGrafico();
 }
